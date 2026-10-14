@@ -90,13 +90,17 @@ subprojects {
         }
     }
 }
-nexusPublishing {
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            username.set(providers.environmentVariable("SONATYPE_USERNAME"))
-            password.set(providers.environmentVariable("SONATYPE_PASSWORD"))
+val sonatypeUsername = System.getenv("SONATYPE_USERNAME")
+val sonatypePassword = System.getenv("SONATYPE_PASSWORD")
+if (sonatypeUsername != null && sonatypePassword != null) {
+    nexusPublishing {
+        repositories {
+            sonatype {
+                nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+                snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+                username.set(sonatypeUsername)
+                password.set(sonatypePassword)
+            }
         }
     }
 }
