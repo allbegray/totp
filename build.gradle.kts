@@ -1,6 +1,15 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath("io.github.gradle-nexus:publish-plugin:2.0.0")
+    }
+}
+
 plugins {
     base
-    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
 allprojects {
@@ -93,7 +102,8 @@ subprojects {
 val sonatypeUsername = System.getenv("SONATYPE_USERNAME")
 val sonatypePassword = System.getenv("SONATYPE_PASSWORD")
 if (sonatypeUsername != null && sonatypePassword != null) {
-    nexusPublishing {
+    apply(plugin = "io.github.gradle-nexus.publish-plugin")
+    extensions.configure<io.github.gradlenexus.publishplugin.NexusPublishExtension> {
         repositories {
             sonatype {
                 nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
