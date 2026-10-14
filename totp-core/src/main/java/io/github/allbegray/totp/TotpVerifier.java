@@ -74,38 +74,33 @@ public final class TotpVerifier {
      */
 
     public boolean verify(@Nullable String code, @Nullable String secret, @Nullable Instant time, int customWindow) {
-        return verifyAndGetTimeStep(code, secret, time, customWindow).valid();
-    }
-
-    /**
-     * Verifies a code and returns the matched time step when successful.
-     *
-     * @param code          the supplied code
-     * @param secret        the Base32-encoded secret
-     * @param time          the time to verify against
-     * @param customWindow  the number of accepted steps before and after {@code time}
-     * @return the verification result
-     */
-    public TotpVerificationResult verifyAndGetTimeStep(@Nullable String code, @Nullable String secret, @Nullable Instant time, int customWindow) {
-        if (code == null || secret == null || time == null || customWindow < 0) {
-            return TotpVerificationResult.invalid();
+        if (code == null || secret == null || time == null) {
+            return false;
+        }
+        if (customWindow < 0) {
+            return false;
         }
         String normalized = normalize(code);
-        if (normalized.length() != generator.digits() || !normalized.chars().allMatch(Character::isDigit)) {
-            return TotpVerificationResult.invalid();
+        if (normalized.length() != generator.digits()) {
+            return false;
+        }
+        if (!normalized.chars().allMatch(Character::isDigit)) {
+            return false;
         }
         long counter = Math.floorDiv(time.getEpochSecond(), generator.periodSeconds());
-        for (int i = -customWindow; i <= customWindow; i++) {
+        int low = (int) -customWindow;
+        int high = customWindow;
+        for (int i = low; i <= high; i++) {
             long candidate = counter + i;
             if (candidate < 0) {
                 continue;
             }
             String expected = generator.generate(secret, candidate);
             if (constantTimeEquals(expected, normalized)) {
-                return new TotpVerificationResult(true, candidate);
+                return true;
             }
         }
-        return TotpVerificationResult.invalid();
+        return false;
     }
 
     private static String normalize(String code) {
