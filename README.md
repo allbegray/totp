@@ -25,7 +25,7 @@ It replaces unmaintained libraries such as `java-totp` and `GoogleAuth` and targ
 
 ```gradle
 dependencies {
-    implementation("io.github.allbegray:totp-core:1.0.2")
+    implementation("io.github.allbegray:totp-core:1.0.5")
 }
 ```
 
@@ -33,8 +33,8 @@ Optional QR support:
 
 ```gradle
 dependencies {
-    implementation("io.github.allbegray:totp-core:1.0.2")
-    implementation("io.github.allbegray:totp-qr:1.0.2")
+    implementation("io.github.allbegray:totp-core:1.0.5")
+    implementation("io.github.allbegray:totp-qr:1.0.5")
 }
 ```
 
@@ -44,7 +44,7 @@ dependencies {
 <dependency>
     <groupId>io.github.allbegray</groupId>
     <artifactId>totp-core</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 
@@ -54,7 +54,7 @@ Optional QR support:
 <dependency>
     <groupId>io.github.allbegray</groupId>
     <artifactId>totp-qr</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 
