@@ -77,18 +77,7 @@ subprojects {
                 }
             }
 
-            val sonatypeUsername = System.getenv("SONATYPE_USERNAME") ?: System.getenv("MAVEN_CENTRAL_USERNAME")
-            val sonatypePassword = System.getenv("SONATYPE_PASSWORD") ?: System.getenv("MAVEN_CENTRAL_PASSWORD")
-            if (sonatypeUsername != null && sonatypePassword != null) {
-                maven {
-                    name = "Sonatype"
-                    url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                    credentials {
-                        username = sonatypeUsername
-                        password = sonatypePassword
-                    }
-                }
-            }
+            // Sonatype/Maven Central publishing is handled by the Nexus publish plugin.
         }
     }
 

@@ -26,4 +26,9 @@ jobs:
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-        run: ./gradlew publish closeAndReleaseSonatypeStagingRepository --no-daemon
+        run: |
+          if [[ -n "$SONATYPE_USERNAME" && -n "$SONATYPE_PASSWORD" ]]; then
+            ./gradlew publish closeAndReleaseSonatypeStagingRepository --no-daemon
+          else
+            ./gradlew publish --no-daemon
+          fi
