@@ -15,6 +15,7 @@ allprojects {
 subprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
+    apply(plugin = "signing")
 
     extensions.configure<JavaPluginExtension> {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -60,6 +61,42 @@ subprojects {
                     }
                 }
             }
+        }
+
+        repositories {
+            val githubToken = System.getenv("GITHUB_TOKEN") ?: System.getenv("GH_TOKEN")
+            if (githubToken != null) {
+                maven {
+                    name = "GitHubPackages"
+                    url = uri("https://maven.pkg.github.com/allbegray/totp")
+                    credentials {
+                        username = System.getenv("GITHUB_ACTOR") ?: "allbegray"
+                        password = githubToken
+                    }
+                }
+            }
+
+            val sonatypeUsername = System.getenv("SONATYPE_USERNAME") ?: System.getenv("MAVEN_CENTRAL_USERNAME")
+            val sonatypePassword = System.getenv("SONATYPE_PASSWORD") ?: System.getenv("MAVEN_CENTRAL_PASSWORD")
+            if (sonatypeUsername != null && sonatypePassword != null) {
+                maven {
+                    name = "Sonatype"
+                    url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                    credentials {
+                        username = sonatypeUsername
+                        password = sonatypePassword
+                    }
+                }
+            }
+        }
+    }
+
+    val publishingExt = extensions.getByType(org.gradle.api.publish.PublishingExtension::class.java)
+    extensions.configure<org.gradle.plugins.signing.SigningExtension> {
+        val signingKey = System.getenv("SIGNING_KEY")
+        if (signingKey != null) {
+            useInMemoryPgpKeys(signingKey, System.getenv("SIGNING_PASSWORD"))
+            sign(publishingExt.publications["mavenJava"])
         }
     }
 }
