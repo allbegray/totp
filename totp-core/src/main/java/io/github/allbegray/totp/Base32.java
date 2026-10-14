@@ -4,11 +4,18 @@ import org.jspecify.annotations.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 
+/** Base32. */
 public final class Base32 {
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
     private Base32() {
     }
+    /**
+     * encode.*
+     *
+     * @param data the data
+     * @return the result
+     */
 
     public static String encode(@Nullable byte[] data) {
         if (data == null || data.length == 0) {
@@ -37,6 +44,12 @@ public final class Base32 {
         }
         return out.toString();
     }
+    /**
+     * decode.*
+     *
+     * @param input the input
+     * @return the result
+     */
 
     public static byte[] decode(@Nullable String input) {
         if (input == null || input.isEmpty()) {

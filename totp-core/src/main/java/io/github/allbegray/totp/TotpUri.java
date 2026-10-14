@@ -4,9 +4,21 @@ import org.jspecify.annotations.Nullable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+/** TotpUri. */
 public final class TotpUri {
     private TotpUri() {
     }
+    /**
+     * build.*
+     *
+     * @param issuer the issuer
+     * @param account the account
+     * @param secret the secret
+     * @param algorithm the algorithm
+     * @param digits the digits
+     * @param periodSeconds the periodSeconds
+     * @return the result
+     */
 
     public static String build(@Nullable String issuer, @Nullable String account, String secret, @Nullable TotpAlgorithm algorithm, int digits, long periodSeconds) {
         if (secret == null || secret.isBlank()) {

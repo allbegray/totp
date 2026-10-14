@@ -1,3 +1,4 @@
+/** Package documentation. */
 @NullMarked
 package io.github.allbegray.totp;
 

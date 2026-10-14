@@ -11,12 +11,21 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+/** TotpQrCodeGenerator. */
 public final class TotpQrCodeGenerator {
     private final int defaultSize;
+    /**
+     * TotpQrCodeGenerator.*
+     */
 
     public TotpQrCodeGenerator() {
         this(256);
     }
+    /**
+     * TotpQrCodeGenerator.*
+     *
+     * @param defaultSize the defaultSize
+     */
 
     public TotpQrCodeGenerator(int defaultSize) {
         if (defaultSize <= 0) {
@@ -24,10 +33,25 @@ public final class TotpQrCodeGenerator {
         }
         this.defaultSize = defaultSize;
     }
+    /**
+     * toImage.*
+     *
+     * @param content the content
+     * @return the result
+     * @throws WriterException if encoding fails
+     */
 
     public BufferedImage toImage(String content) throws WriterException {
         return toImage(content, defaultSize);
     }
+    /**
+     * toImage.*
+     *
+     * @param content the content
+     * @param size the size
+     * @return the result
+     * @throws WriterException if encoding fails
+     */
 
     public BufferedImage toImage(String content, int size) throws WriterException {
         if (content == null || content.isBlank()) {
@@ -40,10 +64,27 @@ public final class TotpQrCodeGenerator {
         BitMatrix matrix = writer.encode(content, BarcodeFormat.QR_CODE, size, size);
         return MatrixToImageWriter.toBufferedImage(matrix);
     }
+    /**
+     * toPng.*
+     *
+     * @param content the content
+     * @return the result
+     * @throws WriterException if encoding fails
+     * @throws IOException if writing fails
+     */
 
     public byte[] toPng(String content) throws WriterException, IOException {
         return toPng(content, defaultSize);
     }
+    /**
+     * toPng.*
+     *
+     * @param content the content
+     * @param size the size
+     * @return the result
+     * @throws WriterException if encoding fails
+     * @throws IOException if writing fails
+     */
 
     public byte[] toPng(String content, int size) throws WriterException, IOException {
         BufferedImage image = toImage(content, size);

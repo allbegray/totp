@@ -3,17 +3,32 @@ package io.github.allbegray.totp;
 import org.jspecify.annotations.Nullable;
 import java.time.Instant;
 
+/** TotpVerifier. */
 public final class TotpVerifier {
     private final TotpGenerator generator;
     private final int window;
+    /**
+     * TotpVerifier.*
+     */
 
     public TotpVerifier() {
         this(new TotpGenerator(), 1);
     }
+    /**
+     * TotpVerifier.*
+     *
+     * @param generator the generator
+     */
 
     public TotpVerifier(TotpGenerator generator) {
         this(generator, 1);
     }
+    /**
+     * TotpVerifier.*
+     *
+     * @param generator the generator
+     * @param window the window
+     */
 
     public TotpVerifier(TotpGenerator generator, int window) {
         if (generator == null) {
@@ -25,14 +40,38 @@ public final class TotpVerifier {
         this.generator = generator;
         this.window = window;
     }
+    /**
+     * verify.*
+     *
+     * @param code the code
+     * @param secret the secret
+     * @return the result
+     */
 
     public boolean verify(@Nullable String code, @Nullable String secret) {
         return verify(code, secret, Instant.now());
     }
+    /**
+     * verify.*
+     *
+     * @param code the code
+     * @param secret the secret
+     * @param time the time
+     * @return the result
+     */
 
     public boolean verify(@Nullable String code, @Nullable String secret, @Nullable Instant time) {
         return verify(code, secret, time, window);
     }
+    /**
+     * verify.*
+     *
+     * @param code the code
+     * @param secret the secret
+     * @param time the time
+     * @param customWindow the customWindow
+     * @return the result
+     */
 
     public boolean verify(@Nullable String code, @Nullable String secret, @Nullable Instant time, int customWindow) {
         if (code == null || secret == null || time == null) {
