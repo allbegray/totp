@@ -3,3 +3,6 @@ build/
 out/
 *.iml
 .idea/
+# signing keys
+*.asc
+*.gpg
