@@ -101,7 +101,7 @@ subprojects {
 }
 val sonatypeUsername = System.getenv("SONATYPE_USERNAME")
 val sonatypePassword = System.getenv("SONATYPE_PASSWORD")
-if (sonatypeUsername != null && sonatypePassword != null) {
+if (!sonatypeUsername.isNullOrBlank() && !sonatypePassword.isNullOrBlank()) {
     apply(plugin = "io.github.gradle-nexus.publish-plugin")
     extensions.configure<io.github.gradlenexus.publishplugin.NexusPublishExtension> {
         repositories {
