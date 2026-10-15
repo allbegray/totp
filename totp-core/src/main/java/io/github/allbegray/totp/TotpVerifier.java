@@ -3,33 +3,41 @@ package io.github.allbegray.totp;
 import org.jspecify.annotations.Nullable;
 import java.time.Instant;
 
-/** TotpVerifier. */
+/**
+ * Verifies TOTP codes against a verification window.
+ *
+ * <p>{@link #verify(String, String, Instant)} returns a {@link TotpVerification} carrying both the
+ * outcome and the matched time step.
+ */
 public final class TotpVerifier {
+    /**
+     * Returned by {@link TotpVerification#timeStep()} when the code is invalid or matches no step
+     * in the verification window. Time steps are never negative, so this value cannot collide with
+     * a real step.
+     */
+    public static final long NO_MATCH = -1L;
+
+    /** Default number of time steps accepted before and after the current step. */
+    public static final int DEFAULT_VERIFICATION_WINDOW = 1;
+
     private final TotpGenerator generator;
     private final int window;
-    /**
-     * TotpVerifier.*
-     */
 
-    public TotpVerifier() {
-        this(new TotpGenerator(), 1);
-    }
     /**
-     * TotpVerifier.*
+     * Creates a verifier with the default verification window.
      *
      * @param generator the generator
      */
-
     public TotpVerifier(TotpGenerator generator) {
-        this(generator, 1);
+        this(generator, DEFAULT_VERIFICATION_WINDOW);
     }
+
     /**
-     * TotpVerifier.*
+     * Creates a verifier.
      *
      * @param generator the generator
-     * @param window the window
+     * @param window the number of time steps accepted before and after the current step
      */
-
     public TotpVerifier(TotpGenerator generator, int window) {
         if (generator == null) {
             throw new IllegalArgumentException("generator must not be null");
@@ -40,67 +48,53 @@ public final class TotpVerifier {
         this.generator = generator;
         this.window = window;
     }
+
     /**
-     * verify.*
+     * Verifies a code against the current time.
      *
      * @param code the code
      * @param secret the secret
-     * @return the result
+     * @return the verification outcome and the matched time step
      */
-
-    public boolean verify(@Nullable String code, @Nullable String secret) {
+    public TotpVerification verify(@Nullable String code, @Nullable String secret) {
         return verify(code, secret, Instant.now());
     }
+
     /**
-     * verify.*
+     * Verifies a code against the given time.
+     *
+     * <p>A code matches when it equals the code generated for any step in the verification window
+     * around the step containing {@code time} (steps {@code -window} to {@code +window}). Whitespace
+     * in the code is ignored. When more than one step matches, the lowest one is reported.
      *
      * @param code the code
      * @param secret the secret
      * @param time the time
-     * @return the result
+     * @return the verification outcome and the matched time step
      */
-
-    public boolean verify(@Nullable String code, @Nullable String secret, @Nullable Instant time) {
-        return verify(code, secret, time, window);
-    }
-    /**
-     * verify.*
-     *
-     * @param code the code
-     * @param secret the secret
-     * @param time the time
-     * @param customWindow the customWindow
-     * @return the result
-     */
-
-    public boolean verify(@Nullable String code, @Nullable String secret, @Nullable Instant time, int customWindow) {
+    public TotpVerification verify(@Nullable String code, @Nullable String secret, @Nullable Instant time) {
         if (code == null || secret == null || time == null) {
-            return false;
-        }
-        if (customWindow < 0) {
-            return false;
+            return new TotpVerification(NO_MATCH);
         }
         String normalized = normalize(code);
         if (normalized.length() != generator.digits()) {
-            return false;
+            return new TotpVerification(NO_MATCH);
         }
         if (!normalized.chars().allMatch(Character::isDigit)) {
-            return false;
+            return new TotpVerification(NO_MATCH);
         }
         long counter = Math.floorDiv(time.getEpochSecond(), generator.periodSeconds());
-        int low = (int) -customWindow;
-        int high = customWindow;
-        for (int i = low; i <= high; i++) {
+        for (int i = -window; i <= window; i++) {
             long candidate = counter + i;
             if (candidate < 0) {
                 continue;
             }
             String expected = generator.generate(secret, candidate);
             if (constantTimeEquals(expected, normalized)) {
-                return true;
+                return new TotpVerification(candidate);
             }
         }
-        return false;
+        return new TotpVerification(NO_MATCH);
     }
 
     private static String normalize(String code) {

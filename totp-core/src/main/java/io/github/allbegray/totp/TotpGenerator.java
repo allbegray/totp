@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import org.jspecify.annotations.Nullable;
 import java.time.Instant;
+import java.util.Locale;
 
 /** TotpGenerator. */
 public final class TotpGenerator {
@@ -27,16 +27,17 @@ public final class TotpGenerator {
         this(DEFAULT_DIGITS, DEFAULT_PERIOD_SECONDS, TotpAlgorithm.SHA1);
     }
     /**
-     * TotpGenerator.*
+     * Creates a generator.
      *
-     * @param digits the digits
-     * @param periodSeconds the periodSeconds
-     * @param algorithm the algorithm
+     * @param digits the number of code digits (1 to 9)
+     * @param periodSeconds the time step in seconds
+     * @param algorithm the HMAC algorithm
      */
 
     public TotpGenerator(int digits, long periodSeconds, TotpAlgorithm algorithm) {
-        if (digits < 1 || digits > 10) {
-            throw new IllegalArgumentException("digits must be between 1 and 10");
+        // Up to 9 digits: the dynamic truncation basis is a 31-bit number.
+        if (digits < 1 || digits > 9) {
+            throw new IllegalArgumentException("digits must be between 1 and 9");
         }
         if (periodSeconds <= 0) {
             throw new IllegalArgumentException("periodSeconds must be positive");
@@ -90,7 +91,7 @@ public final class TotpGenerator {
      * @return the result
      */
 
-    public String generate(String secret, @Nullable Instant time) {
+    public String generate(String secret, Instant time) {
         if (time == null) {
             throw new IllegalArgumentException("time must not be null");
         }
@@ -132,7 +133,7 @@ public final class TotpGenerator {
                     | (hash[offset + 3] & 0xff);
             int modulus = (int) Math.pow(10, digits);
             int otp = binary % modulus;
-            return String.format("%0" + digits + "d", otp);
+            return String.format(Locale.ROOT, "%0" + digits + "d", otp);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new IllegalStateException("Unable to generate TOTP", e);
         }
@@ -140,20 +141,5 @@ public final class TotpGenerator {
 
     private static byte[] longToBytes(long value) {
         return ByteBuffer.allocate(8).putLong(value).array();
-    }
-    /**
-     * otpAuthUri.*
-     *
-     * @param issuer the issuer
-     * @param account the account
-     * @param secret the secret
-     * @param algorithm the algorithm
-     * @param digits the digits
-     * @param periodSeconds the periodSeconds
-     * @return the result
-     */
-
-    public static String otpAuthUri(@Nullable String issuer, @Nullable String account, String secret, @Nullable TotpAlgorithm algorithm, int digits, long periodSeconds) {
-        return TotpUri.build(issuer, account, secret, algorithm, digits, periodSeconds);
     }
 }

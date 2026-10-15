@@ -1,38 +1,48 @@
 package io.github.allbegray.totp;
 
 import org.jspecify.annotations.Nullable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
-/** TotpUri. */
+/** Builds otpauth URIs as understood by authenticator apps. */
 public final class TotpUri {
     private TotpUri() {
     }
     /**
-     * build.*
+     * Builds an otpauth URI from the given parameters.
+     *
+     * <p>The issuer and account form the label ({@code issuer:account}) and are both optional.
+     * When the account is absent, the label is the issuer alone.
+     * The algorithm parameter is omitted when {@code algorithm} is null.
      *
      * @param issuer the issuer
      * @param account the account
      * @param secret the secret
      * @param algorithm the algorithm
      * @param digits the digits
-     * @param periodSeconds the periodSeconds
-     * @return the result
+     * @param periodSeconds the period in seconds
+     * @return the otpauth URI
      */
 
     public static String build(@Nullable String issuer, @Nullable String account, String secret, @Nullable TotpAlgorithm algorithm, int digits, long periodSeconds) {
-        if (secret == null || secret.isBlank()) {
+        if (secret == null || secret.trim().isEmpty()) {
             throw new IllegalArgumentException("secret must not be blank");
         }
+        boolean hasIssuer = issuer != null && !issuer.trim().isEmpty();
+        boolean hasAccount = account != null && !account.trim().isEmpty();
+
         StringBuilder sb = new StringBuilder("otpauth://totp/");
-        if (issuer != null && !issuer.isBlank()) {
-            sb.append(urlEncode(issuer)).append(":");
+        if (hasIssuer) {
+            sb.append(urlEncode(issuer));
+            if (hasAccount) {
+                sb.append(":");
+            }
         }
-        if (account != null && !account.isBlank()) {
+        if (hasAccount) {
             sb.append(urlEncode(account));
         }
         sb.append("?secret=").append(urlEncode(secret));
-        if (issuer != null && !issuer.isBlank()) {
+        if (hasIssuer) {
             sb.append("&issuer=").append(urlEncode(issuer));
         }
         if (algorithm != null) {
@@ -44,6 +54,10 @@ public final class TotpUri {
     }
 
     private static String urlEncode(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
+        try {
+            return URLEncoder.encode(value, "UTF-8").replace("+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("UTF-8 must be supported", e);
+        }
     }
 }

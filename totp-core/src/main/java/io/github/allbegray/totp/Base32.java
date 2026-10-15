@@ -3,9 +3,10 @@ package io.github.allbegray.totp;
 import org.jspecify.annotations.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 /** Base32. */
-public final class Base32 {
+final class Base32 {
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
     private Base32() {
@@ -55,7 +56,7 @@ public final class Base32 {
         if (input == null || input.isEmpty()) {
             return new byte[0];
         }
-        String cleaned = input.replaceAll("[^A-Za-z0-9=]", "").toUpperCase();
+        String cleaned = input.replaceAll("[^A-Za-z0-9=]", "").toUpperCase(Locale.ROOT);
         // Remove any existing padding then re-pad to a multiple of 8.
         String data = cleaned.replace("=", "");
         if (data.isEmpty()) {

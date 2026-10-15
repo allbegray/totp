@@ -4,7 +4,14 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 
-/** Totp. */
+/**
+ * Fluent entry point that wires secret generation, code generation, and verification from one
+ * configuration. Obtain instances via {@link #defaults()} or {@link #builder()}.
+ *
+ * <p>Instances are immutable and thread-safe, so one instance can be shared across threads (for
+ * example as an application-wide singleton). Per-account secrets are passed to the methods rather
+ * than stored in the instance.
+ */
 public final class Totp {
     private final TotpSecretGenerator secretGenerator;
     private final TotpGenerator generator;
@@ -16,34 +23,19 @@ public final class Totp {
         this.verifier = new TotpVerifier(this.generator, builder.verificationWindow);
     }
 
-    private Totp(TotpSecretGenerator secretGenerator, TotpGenerator generator, TotpVerifier verifier) {
-        this.secretGenerator = secretGenerator;
-        this.generator = generator;
-        this.verifier = verifier;
-    }
     /**
-     * defaults.*
-     * @return the result
+     * Creates a Totp with default settings.
+     *
+     * @return a Totp with default settings
      */
 
     public static Totp defaults() {
         return builder().build();
     }
     /**
-     * of.*
+     * Creates a builder for custom settings.
      *
-     * @param secretGenerator the secretGenerator
-     * @param generator the generator
-     * @param verifier the verifier
-     * @return the result
-     */
-
-    public static Totp of(TotpSecretGenerator secretGenerator, TotpGenerator generator, TotpVerifier verifier) {
-        return new Totp(secretGenerator, generator, verifier);
-    }
-    /**
-     * builder.*
-     * @return the result
+     * @return a new builder
      */
 
     public static TotpBuilder builder() {
@@ -103,52 +95,54 @@ public final class Totp {
         return generator.generate(secret, time);
     }
     /**
-     * verifyCode.*
+     * Verifies a code against the current time.
      *
      * @param code the code
      * @param secret the secret
-     * @return the result
+     * @return the verification outcome and the matched time step
      */
 
-    public boolean verifyCode(String code, String secret) {
+    public TotpVerification verifyCode(@Nullable String code, @Nullable String secret) {
         return verifier.verify(code, secret);
     }
     /**
-     * verifyCode.*
+     * Verifies a code against the given time.
      *
      * @param code the code
      * @param secret the secret
      * @param time the time
-     * @return the result
+     * @return the verification outcome and the matched time step
      */
 
-    public boolean verifyCode(String code, String secret, Instant time) {
+    public TotpVerification verifyCode(@Nullable String code, @Nullable String secret, @Nullable Instant time) {
         return verifier.verify(code, secret, time);
     }
     /**
-     * otpAuthUri.*
+     * Builds the otpauth URI for this configuration, encoding the algorithm, digits, and period.
      *
      * @param issuer the issuer
      * @param account the account
      * @param secret the secret
-     * @return the result
+     * @return the otpauth URI
      */
 
     public String otpAuthUri(@Nullable String issuer, @Nullable String account, String secret) {
-        return TotpGenerator.otpAuthUri(issuer, account, secret, generator.algorithm(), generator.digits(), generator.periodSeconds());
+        return TotpUri.build(issuer, account, secret, generator.algorithm(), generator.digits(), generator.periodSeconds());
     }
 
-    /** Builder. */
+    /**
+     * Builder for {@link Totp}. Not thread-safe: create and use one builder per configuration.
+     */
     public static final class TotpBuilder {
-        /** Creates a builder with default settings. */
-        public TotpBuilder() {
-        }
-
-        private int digits = 6;
-        private long periodSeconds = 30L;
+        private int digits = TotpGenerator.DEFAULT_DIGITS;
+        private long periodSeconds = TotpGenerator.DEFAULT_PERIOD_SECONDS;
         private TotpAlgorithm algorithm = TotpAlgorithm.SHA1;
-        private int secretBytes = 20;
-        private int verificationWindow = 1;
+        private int secretBytes = TotpSecretGenerator.DEFAULT_SECRET_BYTES;
+        private int verificationWindow = TotpVerifier.DEFAULT_VERIFICATION_WINDOW;
+
+        /** Creates a builder with default settings. */
+        private TotpBuilder() {
+        }
         /**
          * digits.*
          *
